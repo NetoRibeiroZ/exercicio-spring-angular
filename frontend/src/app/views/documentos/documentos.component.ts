@@ -10,6 +10,8 @@ import {
 import {
   TransferirDialogComponent
 } from "../../shared/transferir-dialog/transferir-dialog.component";
+import { FormControl } from '@angular/forms';
+
 
 @Component({
   selector: 'app-documentos',
@@ -17,12 +19,12 @@ import {
   styleUrls: ['./documentos.component.sass']
 })
 export class DocumentosComponent implements OnInit {
-
-  q = "";
+  filtroNome = new FormControl('');
   pasta: Pasta = {nome: "Carregando..."};
   documentos: Documento[] = [];
   setorId: number = 0;
   pastaId: number = 0;
+  documentosFiltrados:Documento[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -30,7 +32,7 @@ export class DocumentosComponent implements OnInit {
     public dialog: MatDialog) {
   }
 
-  async ngOnInit() {
+  ngOnInit() {
     this.listar();
   }
 
@@ -39,7 +41,8 @@ export class DocumentosComponent implements OnInit {
       this.setorId = parseInt(<string>next.get("setorId"));
       this.pastaId = parseInt(<string>next.get("pastaId"));
       this.pasta = await this.api.getPasta(this.setorId, this.pastaId);
-      this.documentos = await this.api.getDocumentos(this.setorId, this.pastaId, this.q);
+      this.documentos = await this.api.getDocumentos(this.setorId, this.pastaId);
+      this.documentosFiltrados = this.documentos;
     });
   }
 
@@ -54,7 +57,15 @@ export class DocumentosComponent implements OnInit {
       }
     });
   }
+  exibirHistorico(doc: Documento): void {
+    this.dialog.open(DocumentoDialogComponent, {
 
+    }).afterClosed().subscribe(async result => {
+      if (result) {
+        this.listar();
+      }
+    });
+  }
   transferir(doc: Documento) {
     this.dialog.open(TransferirDialogComponent, {
       data: ({...doc}),
@@ -67,5 +78,10 @@ export class DocumentosComponent implements OnInit {
       }
     });
   }
+filtrarDocumentos(event:any) {
+  this.documentosFiltrados = this.documentos.filter(documento =>
+        documento.titulo.toLowerCase().includes(event.target.value.toLowerCase())
+      );
 
+  }
 }

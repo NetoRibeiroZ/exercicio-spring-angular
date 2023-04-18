@@ -16,4 +16,5 @@ public interface DocumentoRepository extends JpaRepository<Documento, Long> {
 
     @Query("select d from Documento d where d.pasta.setor.id = :setorId and d.pasta.id = :pastaId and d.id = :id")
     Optional<Documento> findById(Long setorId, Long pastaId, Long id);
+
 }
