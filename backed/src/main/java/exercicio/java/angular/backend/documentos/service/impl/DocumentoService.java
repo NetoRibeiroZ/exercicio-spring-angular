@@ -1,6 +1,7 @@
 package exercicio.java.angular.backend.documentos.service.impl;
 
 import exercicio.java.angular.backend.documentos.model.Documento;
+import exercicio.java.angular.backend.documentos.model.HistoricoDocumento;
 import exercicio.java.angular.backend.documentos.model.Situacao;
 import exercicio.java.angular.backend.documentos.repository.DocumentoRepository;
 import exercicio.java.angular.backend.documentos.repository.SituacaoRepository;
@@ -14,7 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import exercicio.java.angular.backend.documentos.repository.HistoricoDocumentoRepository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +36,11 @@ public class DocumentoService implements IDocumentoService {
     @Autowired
     private SituacaoRepository situacaoRepository;
 
+    @Autowired
+    private HistoricoDocumentoRepository historicoRepository;
+
+
+    
     @Override
     public List<Documento> listAll(Long setorId, Long pastaId, String q) {
         return repository.listAll(setorId, pastaId, q);
@@ -56,15 +64,24 @@ public class DocumentoService implements IDocumentoService {
 
     @Override
     @Transactional
-    public Documento update(Long setorId, Long pastaId,long id,  Documento documento) {
+    public Documento update(Long setorId, Long pastaId, long id, Documento documento) {
         Pasta pasta = validacoes(setorId, pastaId);
         Documento existente = repository.findById(documento.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "documento não existe"));
+    
         if (!existente.getPasta().equals(pasta)) {
             Situacao transferido = situacaoRepository.findById(Situacao.TRANSFERIDO)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "situação inválida"));
             documento.setSituacao(transferido);
+    
+            // adiciona uma entrada no histórico do documento com a informação da transferência
+            HistoricoDocumento historico = new HistoricoDocumento();
+            historico.setDocumento(existente);
+            historico.setData((java.sql.Date) new Date(System.currentTimeMillis()));
+            historico.setMudanca("Arquivo transferido para a pasta " + pasta.getNome());
+            historicoRepository.save(historico);
         }
+    
         existente.setTitulo(documento.getTitulo());
         return repository.save(existente);
     }
