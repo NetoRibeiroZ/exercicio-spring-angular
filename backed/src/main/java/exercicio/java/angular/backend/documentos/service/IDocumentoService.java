@@ -13,5 +13,5 @@ public interface IDocumentoService {
 
     Documento insert(Long setorId, Long pastaId, Documento novo);
 
-    Documento update(Long setorId, Long pastaId, Documento documento);
+    Documento update(Long setorId, Long pastaId, long id, Documento documento);
 }

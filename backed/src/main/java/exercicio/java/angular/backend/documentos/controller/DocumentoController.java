@@ -48,12 +48,13 @@ public class DocumentoController {
         return service.insert(setorId, pastaId, novo);
     }
 
-    @PutMapping
+    @PutMapping("{id}")
     @ApiOperation(value = "Atualiza um documento no  banco")
     public Documento update(
             @PathVariable Long setorId,
             @PathVariable Long pastaId,
+            @PathVariable Long id,
             @RequestBody Documento documento) {
-        return service.update(setorId, pastaId, documento);
+        return service.update(setorId, pastaId, id, documento);
     }
 }

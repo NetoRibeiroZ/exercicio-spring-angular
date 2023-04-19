@@ -56,7 +56,7 @@ public class DocumentoService implements IDocumentoService {
 
     @Override
     @Transactional
-    public Documento update(Long setorId, Long pastaId, Documento documento) {
+    public Documento update(Long setorId, Long pastaId,long id,  Documento documento) {
         Pasta pasta = validacoes(setorId, pastaId);
         Documento existente = repository.findById(documento.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "documento não existe"));
